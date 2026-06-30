@@ -8,6 +8,29 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--y:#F5C000;--yd:#D4A000;--dk:#1a1a1a;--mid:#444;--muted:#777;--border:#ddd;--bg:#f5f4f0;--white:#fff;--radius:6px}
+:root[data-theme="dark"]{--dk:#f2f2f2;--mid:#d8d8d8;--muted:#a8a8a8;--border:#3a3a3a;--bg:#15161a;--white:#1e2025;--card-header:#0e0f12}
+body{background:var(--bg);transition:background .2s,color .2s}
+:root[data-theme="dark"] body{color:#eee}
+:root[data-theme="dark"] .section{background:var(--white);border-color:var(--border);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+:root[data-theme="dark"] .section-header{background:var(--card-header)}
+:root[data-theme="dark"] .field input,
+:root[data-theme="dark"] .field select,
+:root[data-theme="dark"] .field textarea,
+:root[data-theme="dark"] .cuit-input{background-color:#262830;color:#f2f2f2;border-color:var(--border)}
+:root[data-theme="dark"] .field input::placeholder,
+:root[data-theme="dark"] .cuit-input::placeholder{color:#777}
+:root[data-theme="dark"] .field input:focus,
+:root[data-theme="dark"] .field select:focus,
+:root[data-theme="dark"] .field textarea:focus{border-color:#aaa;box-shadow:0 0 0 3px rgba(255,255,255,.07)}
+:root[data-theme="dark"] .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23bbb' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")}
+:root[data-theme="dark"] .header{background:var(--card-header)}
+:root[data-theme="dark"] .export-bar{background:rgba(20,21,25,.96);border-top-color:var(--border)}
+:root[data-theme="dark"] .btn-clear{color:var(--muted);border-color:var(--border)}
+:root[data-theme="dark"] .btn-clear:hover{border-color:#999;color:#fff}
+:root[data-theme="dark"] .status{color:#ccc}
+:root[data-theme="dark"] option{background-color:#262830;color:#f2f2f2}
+.theme-toggle{background:transparent;border:1.5px solid #555;color:#fff;border-radius:20px;padding:.4rem .85rem;font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+.theme-toggle:hover{border-color:var(--y);color:var(--y)}
 body{font-family:"IBM Plex Sans",sans-serif;background:var(--bg);color:var(--dk);font-size:14px;line-height:1.5;min-height:100vh}
 .app{max-width:920px;margin:0 auto;padding:1.5rem 1rem 5rem}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;padding:.9rem 1.4rem;background:var(--dk);border-radius:10px;gap:1rem;flex-wrap:wrap}
@@ -61,6 +84,8 @@ body{font-family:"IBM Plex Sans",sans-serif;background:var(--bg);color:var(--dk)
 .status{font-size:12px;color:#555;min-width:180px;text-align:center}
 .status.ok{color:#2a7a2a;font-weight:500}
 .status.err{color:#a00;font-weight:500}
+:root[data-theme="dark"] .status.ok{color:#4ade80}
+:root[data-theme="dark"] .status.err{color:#f87171}
 @media(max-width:600px){.r2,.r3,.r14,.r2a{grid-template-columns:1fr}.header{flex-direction:column}.header-right{text-align:left}}
 </style>
 </head>
@@ -79,6 +104,9 @@ body{font-family:"IBM Plex Sans",sans-serif;background:var(--bg);color:var(--dk)
       <h1>Solicitud de Apertura de Cuenta</h1>
       <p>Centro de la Construcción en Seco</p>
     </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" type="button">
+      <span id="themeIcon">🌙</span><span id="themeLabel">Modo oscuro</span>
+    </button>
   </div>
 
   <!-- DATOS GENERALES -->
@@ -403,6 +431,29 @@ function clearForm(){
   document.getElementById("subBarrioWrap").className="sub-barrio-wrap";
   setStatus("Formulario limpiado.","");
 }
+
+function applyTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+  const icon = document.getElementById("themeIcon");
+  const label = document.getElementById("themeLabel");
+  if(icon && label){
+    if(theme === "dark"){ icon.textContent="☀️"; label.textContent="Modo claro"; }
+    else { icon.textContent="🌙"; label.textContent="Modo oscuro"; }
+  }
+  try{ localStorage.setItem("yesplack_theme", theme); }catch(e){}
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  applyTheme(current === "dark" ? "light" : "dark");
+}
+(function initTheme(){
+  let saved = "light";
+  try{ saved = localStorage.getItem("yesplack_theme") || "light"; }catch(e){}
+  if(saved !== "dark" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches){
+    saved = "dark";
+  }
+  applyTheme(saved);
+})();
 
 function setStatus(msg,cls){
   const el=document.getElementById("status");
